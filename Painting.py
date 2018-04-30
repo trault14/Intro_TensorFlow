@@ -140,4 +140,7 @@ with tf.Session() as sess:
             img = np.clip(ys_pred.reshape(img.shape), 0, 255).astype(np.uint8)
             plt.imshow(img)
             #fig.canvas.draw()
+            plt.ion()
             plt.show()
+            #plt.draw()
+            plt.pause(0.001)
