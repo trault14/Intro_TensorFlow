@@ -38,6 +38,13 @@ print(xs.shape, ys.shape)
 
 
 def distance(p1, p2):
+    """
+    Takes two matrices of the same dimensions and returns the matrix
+    of abs(mat1(i,j) - mat2(i,j)) for every (i,j) in the matrices.
+    :param p1: matrix of the same dimensions as p1
+    :param p2: matrix of the same dimensions as p2
+    :return: the matrix of abs(p1(i,j) - mp2(i,j)) for every (i,j) in p1 and p2
+    """
     return tf.abs(p1 - p2)
 
 
@@ -57,7 +64,7 @@ def linear(X, n_input, n_output, activation=None, scope=None):
     """
     with tf.variable_scope(scope or "linear"):
         W = tf.get_variable(
-            name='W',
+            name='W',  # it's ok to give the same name to the weights of each layer thanks to the scope
             shape=[n_input, n_output],
             initializer=tf.random_normal_initializer(mean=0.0, stddev=0.1))
         b = tf.get_variable(
@@ -72,12 +79,19 @@ def linear(X, n_input, n_output, activation=None, scope=None):
         return a
 
 
+# X is the input to the network, containing batch_size number of elements
+# (x, y), representing the coordinates of the pixels for which we
+# want to guess the corresponding RGB values. None can be replaced by any value
 X = tf.placeholder(tf.float32, shape=[None, 2], name='X')
 Y = tf.placeholder(tf.float32, shape=[None, 3], name='Y')
 
 # ==== CREATION OF THE NETWORK ====
 n_neurons = [2, 64, 64, 64, 64, 64, 64, 3]
 
+# Generate the layers indicated in the n_neurons list.
+# This generates the weights, biases and activation functions
+# The activation values calculated by the linear function
+# are stored in current_input which is used as input to create the next layer
 current_input = X
 for layer_i in range(1, len(n_neurons)):
     current_input = linear(
@@ -86,9 +100,11 @@ for layer_i in range(1, len(n_neurons)):
         n_output=n_neurons[layer_i],
         activation=tf.nn.relu if (layer_i+1) < len(n_neurons) else None,
         scope='layer_' + str(layer_i))
-Y_pred = current_input
+Y_pred = current_input  # Y_pred receives the activation values of the output layer
 
 # ==== TRAINING THE NETWORK ====
+# Sum the R, G and B error values for each row (i.e. each predicted-example's error)
+# Then take the mean error over all the examples of the batch
 cost = tf.reduce_mean(tf.reduce_sum(distance(Y_pred, Y), 1))
 optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
 
@@ -103,12 +119,18 @@ with tf.Session() as sess:
     # We now run a loop over epochs
     prev_training_cost = 0.0
     for it_i in range(n_iterations):
-        idxs = np.random.permutation(range(len(xs)))
-        n_batches = len(idxs) // batch_size
+        # Get a random permutation of indices to randomize the order of our input data
+        indices = np.random.permutation(range(len(xs)))
+        n_batches = len(indices) // batch_size
         for batch_i in range(n_batches):
-            idxs_i = idxs[batch_i * batch_size: (batch_i + 1) * batch_size]
-            sess.run(optimizer, feed_dict={X: xs[idxs_i], Y: ys[idxs_i]})
+            # Get the random indices corresponding to the current batch
+            indices_i = indices[batch_i * batch_size: (batch_i + 1) * batch_size]
+            # Calculate the gradients of the examples in the batch, take the mean
+            # gradient, and modify the weights and biases of the network accordingly
+            sess.run(optimizer, feed_dict={X: xs[indices_i], Y: ys[indices_i]})
 
+        # Once all the batches have been processed, re-iterate the randomization
+        # and train again
         training_cost = sess.run(cost, feed_dict={X: xs, Y: ys})
         print(it_i, training_cost)
 
