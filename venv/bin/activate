@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelavent variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/timrault/PycharmProjects/untitled/venv"
+VIRTUAL_ENV="/Users/timrault/PycharmProjects/Intro_TensorFlow/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
@@ -74,3 +74,4 @@ fi
 if [ -n "$BASH" -o -n "$ZSH_VERSION" ] ; then
     hash -r
 fi
+
