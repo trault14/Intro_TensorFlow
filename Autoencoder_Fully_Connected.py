@@ -78,7 +78,7 @@ for layer_i, n_output in enumerate(dimensions):
             initializer=tf.random_normal_initializer(mean=0.0, stddev=0.02))
 
         # Now we'll multiply our input by our newly created W matrix
-        # and add the bias
+        # We could also add a bias
         h = tf.matmul(current_input, W)
 
         # And then use a ReLu activation function on its output
@@ -123,11 +123,15 @@ Y = current_input
 cost = tf.reduce_mean(tf.squared_difference(X, Y), 1)
 print(cost.get_shape())
 # Then we take the mean again across the batch
+# So, the cost is measuring the average pixel difference across our mini batch
 cost = tf.reduce_mean(cost)
 
 # ==== TRAINING OF THE NETWORK ====
 # We can now use an optimizer to train our network
 learning_rate = 0.001
+# The optimizer is going to apply back propagation to follow the gradient
+# from the output of the network all the way back to the input and update
+# all of the variables along the way.
 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 
 # Let's manage the training in mini batches
@@ -149,6 +153,8 @@ fig, ax = plt.subplots(1, 1)
 for epoch_i in range(n_epochs):
     for batch_X, _ in ds.train.next_batch():
         sess.run(optimizer, feed_dict={X: batch_X - mean_img})
+    # After every epoch, we try to reconstruct the first 100 images to get
+    # an idea of how well the algorithm is learning over time.
     recon = sess.run(Y, feed_dict={X: examples - mean_img})
     # -1 is an inferred dimension. It represents the number of 28 by 28 images that
     # we are going to get back when doing the reshape
