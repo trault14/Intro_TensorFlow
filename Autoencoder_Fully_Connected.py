@@ -1,4 +1,3 @@
-# imports
 # %matplotlib inline
 # %pylab osx
 import tensorflow as tf
@@ -12,8 +11,6 @@ from libs.utils import montage
 from libs import gif
 import IPython.display as ipyd
 from libs.datasets import MNIST
-plt.style.use('ggplot')
-
 # Bit of formatting of the default inline code style:
 from IPython.core.display import HTML
 HTML("""<style> .rendered_html code { 
@@ -22,6 +19,7 @@ HTML("""<style> .rendered_html code {
     background-color: #f9f2f4;
     border-radius: 4px;
 } </style>""")
+plt.style.use('ggplot')
 
 # ==== IMPORT THE DATA ====
 ds = MNIST()
@@ -43,7 +41,7 @@ std_img = np.std(ds.X, axis=0)
 plt.figure()
 plt.imshow(std_img.reshape((28, 28)))
 
-# ==== CREATION OF THE FIRST HALF OF THE NETWORK ====
+# ==== ENCODER - CREATION OF THE FIRST HALF OF THE NETWORK ====
 # We are going to build a series of fully connected layers that get progressively smaller.
 # The number of neurons in the input layer is going to be the number of pixels in an image
 dimensions = [512, 256, 128, 64]
@@ -93,7 +91,7 @@ for layer_i, n_output in enumerate(dimensions):
 
 print(current_input.get_shape())
 
-# ==== REVERSE THE INPUT IMAGES BACK TO THEIR ORIGINAL DIMENSIONS ====
+# ==== DECODER - REVERSE THE INPUT IMAGES BACK TO THEIR ORIGINAL DIMENSIONS ====
 # We'll first reverse the order of our weight matrices
 Ws = Ws[::-1]
 
@@ -118,6 +116,7 @@ for layer_i, n_output in enumerate(dimensions):
 # The output of the network
 Y = current_input
 
+# ==== TRAINING THE NETWORK ====
 # Now we need to define a training signal to train the network.
 # We'll first measure the average difference across every pixel
 cost = tf.reduce_mean(tf.squared_difference(X, Y), 1)
@@ -126,7 +125,6 @@ print(cost.get_shape())
 # So, the cost is measuring the average pixel difference across our mini batch
 cost = tf.reduce_mean(cost)
 
-# ==== TRAINING OF THE NETWORK ====
 # We can now use an optimizer to train our network
 learning_rate = 0.001
 # The optimizer is going to apply back propagation to follow the gradient
