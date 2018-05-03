@@ -1,4 +1,6 @@
+import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from libs import datasets
 from libs import utils
 
@@ -31,7 +33,7 @@ Y = tf.placeholder(tf.float32, [None, n_output])
 # Connect the input to the output with a linear layer.
 # We use the SoftMax activation to make sure the outputs
 #  sum to 1, making them probabilities
-Y_pred, W = utils.linear(
+Y_predicted, W = utils.linear(
     x=X,
     n_output=n_output,
     activation=tf.nn.softmax,
@@ -39,12 +41,12 @@ Y_pred, W = utils.linear(
 
 # Cost function. We add 1e-12 (epsilon) to avoid reaching 0,
 # where log is undefined.
-cross_entropy = -tf.reduce_sum(Y * tf.log(Y_pred + 1e-12))
+cross_entropy = -tf.reduce_sum(Y * tf.log(Y_predicted + 1e-12))
 optimizer = tf.train.AdamOptimizer(0.001).minimize(cross_entropy)
 
 # Output. The predicted class is the one weighted with the
 # highest probability in our regression output :
-predicted_y = tf.argmax(Y_pred, 1)
+predicted_y = tf.argmax(Y_predicted, 1)
 actual_y = tf.argmax(Y, 1)
 
 # We can measure the accuracy of our network like so.
@@ -77,3 +79,19 @@ for epoch_i in range(n_epochs):
 # of the network, and then start using it to classify unlabeled images
 test = ds.test
 print(sess.run(accuracy, feed_dict={X: test.images, Y: test.labels}))
+
+# ==== INSPECTING THE NETWORK ====
+# We first get the graph that we used to compute the network
+g = tf.get_default_graph()
+
+# And we inspect everything inside of it
+print([op.name for op in g.get_operations()])
+# Get the weight matrix by requesting the output of the corresponding tensor
+W = g.get_tensor_by_name('layer1/W:0')
+# Evaluate the value of tensor W
+W_arr = np.array(W.eval(session=sess))
+print(W_arr.shape)
+# Let's now visualize every neuron (column) of the weight matrix
+fig, ax = plt.subplots(1, 10, figsize=(20, 3))
+for col_i in range(10):
+    ax[col_i].imshow(W_arr[:, col_i].reshape((28, 28)), cmap='coolwarm')
