@@ -12,7 +12,7 @@ def MNIST(one_hot=True, split=[1.0, 0.0, 0.0]):
     Returns
     -------
     mnist : DataSet
-        DataSet object w/ convenienve props for accessing
+        DataSet object w/ convenience props for accessing
         train/validation/test sets and batches.
     """
     ds = input_data.read_data_sets('MNIST_data/', one_hot=one_hot)
