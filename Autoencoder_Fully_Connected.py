@@ -21,6 +21,15 @@ HTML("""<style> .rendered_html code {
 } </style>""")
 plt.style.use('ggplot')
 
+# ==== DESCRIPTION OF THE NETWORK ====
+"""
+This Auto Encoder Neural Network takes a 28 by 28 (784 values) pixel 
+image (or a batch of images) as its input. It learns to encode it 
+down to 64 values, and to retrieve the original image as its output,
+only using the encoded values. This Fully Connected Neural 
+Network learns in an unsupervised fashion as the input data is unlabeled.
+"""
+
 # ==== IMPORT THE DATA ====
 ds = MNIST()
 print(ds.X.shape)
