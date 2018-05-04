@@ -6,6 +6,13 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 plt.style.use('ggplot')
 
+# DESCRIPTION OF THE NETWORK
+"""
+This neural network is simply a deeper version of 
+the network described in the file 'Nonlinearities_Activation.py'.
+The network now contains three hidden layers, of 10 neurons each. 
+"""
+
 # Let's create some toy data
 
 # We are going to say that we have seen 1000 values of some underlying representation that we aim to discover

@@ -6,6 +6,16 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 plt.style.use('ggplot')
 
+# ==== DESCRIPTION ====
+"""
+This simple neural network is based on the 
+file 'Stochastic_Gradient_Descent.py' and 
+widens the single layer to 100 neurons in 
+order to understand the role of the width 
+in a neural network. 
+"""
+
+
 # Let's create some toy data
 
 # We are going to say that we have seen 1000 values of some underlying representation that we aim to discover

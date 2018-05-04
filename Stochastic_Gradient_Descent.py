@@ -6,6 +6,17 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 plt.style.use('ggplot')
 
+# ==== DESCRIPTION ====
+"""
+This algorithm seeks to describe the process of 
+stochastic gradient descent, in order to later 
+apply it to more complex neural networks.
+The objective is to find the best fit to a 
+set experimental data points (x, y). The underlying
+cause of the data is a sine wave but the measures
+contain noise. 
+"""
+
 # Let's create some toy data
 
 # We are going to say that we have seen 1000 values of some underlying representation that we aim to discover
@@ -30,7 +41,7 @@ def distance(p1, p2):
 X = tf.placeholder(tf.float32, name='X')
 Y = tf.placeholder(tf.float32, name='Y')
 
-#sess = tf.InteractiveSession()
+sess = tf.InteractiveSession()
 n = tf.random_normal([1000], stddev=0.1).eval()
 
 W = tf.Variable(tf.random_normal([1], dtype=tf.float32, stddev=0.1), name='weight')

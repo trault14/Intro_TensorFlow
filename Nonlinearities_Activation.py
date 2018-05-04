@@ -6,6 +6,17 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 plt.style.use('ggplot')
 
+# ==== DESCRIPTION OF THE NETWORK ====
+"""
+A simple supervised neural network composed of a single 
+layer containing 10 neurons. We have at our disposal a set
+of (x, y) experimental values. The underlying function is a
+sine wave but the y values contain some noise. The objective 
+is for the network to learn the underlying sine model and be
+able to generalize to unseen data. The input is an x value and its
+corresponding y value. The output is the predicted value y_pred. 
+"""
+
 # Let's create some toy data
 
 # We are going to say that we have seen 1000 values of some underlying representation that we aim to discover
