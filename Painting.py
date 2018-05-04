@@ -8,6 +8,18 @@ from skimage.data import astronaut
 from scipy.misc import imresize
 plt.style.use('ggplot')
 
+# ==== DESCRIPTION OF THE NETWORK ====
+"""
+This neural network implements a fun application : painting
+and image. The input to the network is a position on the 
+image, X = (row, col). The output is the color to paint,
+Y = (R, G, B). The network is of type fully connected and is
+composed of 6 hidden layers each containing 64 neurons.
+The network relies on a supervised type of learning, given 
+that each input position (x, y) is accompanied by its 
+corresponding (r, g, b) label in the picture.
+"""
+
 # ==== CREATION OF THE DATA ====
 img = imresize(astronaut(), (64, 64))
 plt.imshow(img)
