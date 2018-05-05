@@ -36,6 +36,7 @@ print(ds.X.shape)
 # re-shape the first image to a square so we can see all
 # the pixels arranged in rows and columns instead of one giant vector
 plt.imshow(ds.X[0].reshape((28, 28)))
+plt.show()
 
 # ==== LOOK AT THE MEAN AND STDDEV OF THE DATA SET ====
 # Take the mean across all images
@@ -43,12 +44,14 @@ mean_img = np.mean(ds.X, axis=0)
 # Then plot the mean image.
 plt.figure()
 plt.imshow(mean_img.reshape((28, 28)), cmap='gray')
+plt.show()
 
 # Take the std across all images
 std_img = np.std(ds.X, axis=0)
 # Then plot the std image.
 plt.figure()
 plt.imshow(std_img.reshape((28, 28)))
+plt.show()
 
 # ==== ENCODER - CREATION OF THE FIRST HALF OF THE NETWORK ====
 # We are going to build a series of fully connected layers that get progressively smaller.
