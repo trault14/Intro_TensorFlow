@@ -95,3 +95,4 @@ print(W_arr.shape)
 fig, ax = plt.subplots(1, 10, figsize=(20, 3))
 for col_i in range(10):
     ax[col_i].imshow(W_arr[:, col_i].reshape((28, 28)), cmap='coolwarm')
+plt.show()

@@ -174,3 +174,4 @@ for epoch_i in range(n_epochs):
 gif.build_gif(images, saveto='ae.gif', cmap='gray')
 
 ipyd.Image(url='ae.gif?{}'.format(np.random.rand()), height=500, width=500)
+plt.show()
