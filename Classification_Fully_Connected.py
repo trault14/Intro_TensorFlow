@@ -70,7 +70,7 @@ for epoch_i in range(n_epochs):
     # If the validation accuracy reaches a threshold, or if it starts decreasing,
     # stop training to avoid over fitting
     validation_accuracy = sess.run(accuracy, feed_dict={X: valid.images, Y: valid.labels})
-    print(validation_accuracy)
+    print("Epoch {} ".format(epoch_i) + "validation accuracy : {}".format(validation_accuracy))
     if (validation_accuracy - previous_validation_accuracy) < 0:
         break
     previous_validation_accuracy = validation_accuracy
@@ -78,7 +78,7 @@ for epoch_i in range(n_epochs):
 # Run a test with the test data set to get a confirmation of the accuracy
 # of the network, and then start using it to classify unlabeled images
 test = ds.test
-print(sess.run(accuracy, feed_dict={X: test.images, Y: test.labels}))
+print("Test accuracy : {}".format(sess.run(accuracy, feed_dict={X: test.images, Y: test.labels})))
 
 # ==== INSPECTING THE NETWORK ====
 # We first get the graph that we used to compute the network
@@ -95,4 +95,10 @@ print(W_arr.shape)
 fig, ax = plt.subplots(1, 10, figsize=(20, 3))
 for col_i in range(10):
     ax[col_i].imshow(W_arr[:, col_i].reshape((28, 28)), cmap='coolwarm')
+plt.show()
+
+# ==== USING THE NETWORK ====
+# Inject a single image into the network and review the prediction
+sess.run(predicted_y, feed_dict={X: [ds.X[3]]})
+plt.imshow(ds.X[3].reshape((28, 28)))
 plt.show()
