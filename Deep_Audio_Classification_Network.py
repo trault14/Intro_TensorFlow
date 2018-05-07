@@ -157,7 +157,7 @@ H = X
 for layer_i, n_filters_i in enumerate(n_filters):
     # Let's use the helper function to create our connection to the next layer:
     # TODO: explore changing the parameters here:
-    H, W = utils.conv2d(H, n_filters_i, k_h=5, k_w=5, d_h=3, d_w=2, name=str(layer_i))
+    H, W = utils.conv2d(H, n_filters_i, k_h=3, k_w=3, d_h=2, d_w=2, name=str(layer_i))
 
     # And use a non linearity
     # TODO: explore changing the activation here:
@@ -167,11 +167,11 @@ for layer_i, n_filters_i in enumerate(n_filters):
     print(H.get_shape().as_list())
 
 # Connect the last convolutional layer to a fully connected network (TODO)!
-fc, W = utils.linear(H, 12, name="fully_connected_layer_1")
+fc, W = utils.linear(H, 100, name="fully_connected_layer_1", activation=tf.nn.tanh)
 
 # And another fully connected layer, now with just 2 outputs, the number of outputs that our
 # one hot encoding has
-Y_predicted, W = utils.linear(fc, 2, name="fully_connected_layer_2")
+Y_predicted, W = utils.linear(fc, 2, activation=tf.nn.softmax, name="fully_connected_layer_2")
 
 # ==== TRAINING THE NETWORK ====
 # Cost function (measures the average loss of the batches)
@@ -188,7 +188,7 @@ learning_rate = 0.001
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
 # Explore these parameters: (TODO)
-n_epochs = 10
+n_epochs = 100
 batch_size = 200
 
 sess = tf.Session()
@@ -211,7 +211,7 @@ for epoch_i in range(n_epochs):
         print(this_accuracy / iterations)
     print('Training accuracy: ', this_accuracy / iterations)
 
-    # Validation (see how the network does on unseen data).
+    # Validation : see how the network does on data that is not used for training
     this_accuracy = 0
     iterations = 0
     for Xs_i, ys_i in ds.valid.next_batch(batch_size):
@@ -221,6 +221,14 @@ for epoch_i in range(n_epochs):
         iterations += 1
     print('Validation accuracy: ', this_accuracy / iterations)
 
+# Test : estimate the network's accuracy to generalize to unseen data after training
+this_accuracy = 0
+iterations = 0
+for Xs_i, ys_i in ds.test.next_batch(batch_size):
+    this_accuracy += sess.run(accuracy, feed_dict={X: Xs_i, Y: ys_i})
+    iterations += 1
+print('Test accuracy : ', this_accuracy / iterations)
+
 # ==== INSPECTING THE NETWORK ====
 g = tf.get_default_graph()
 for layer_i in range(len(n_filters)):
@@ -229,3 +237,19 @@ for layer_i in range(len(n_filters)):
     plt.imshow(utils.montage_filters(W))
     plt.title('Layer {}\'s Learned Convolution Kernels'.format(layer_i))
     plt.show()
+
+# ==== USING THE NETWORK ====
+# Input a sound file and have the network classify it between music (0) or speech (1)
+wav_file = os.path.join(music_dir, 'hendrix.wav')
+s = utils.load_audio(wav_file)
+re, im = dft.dft_np(s, fft_size=fft_size, hop_size=hop_size)
+mag, phs = dft.ztoc(re, im)
+n_hops = (len(mag) - n_frames) // frame_hops
+Xs = []
+for hop_i in range(n_hops):
+    frames = mag[(hop_i * frame_hops):(hop_i * frame_hops + n_frames)]
+    this_X = np.log(np.abs(frames[..., np.newaxis]) + 1e-10)
+    Xs.append(this_X)
+Xs = np.array(Xs)
+res = sess.run(tf.arg_max(tf.reduce_mean(Y_predicted, 0), 0), feed_dict={X: Xs})
+print(res)
