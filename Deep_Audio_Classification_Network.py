@@ -20,7 +20,7 @@ a one-hot encoding of the probabilities [music, speech].
 The analysis of the audio files relies on the use of the 
 Fourier transform. The network is capable of reaching a final
 test accuracy on unseen data of about 97% after approximately
-8 epochs of training.
+10 epochs of training.
 """
 
 # ==== PREPARING THE DATA ====
@@ -40,12 +40,8 @@ music = [os.path.join(music_dir, file_i) for file_i in os.listdir(music_dir) if 
 speech_dir = os.path.join(os.path.join(dst, 'music_speech'), 'speech_wav')
 speech = [os.path.join(speech_dir, file_i) for file_i in os.listdir(speech_dir) if file_i.endswith('.wav')]
 
-# Print the file names
-print(music, speech)
 
-# Store every magnitude frame and its label being music: 0 or speech: 1
-Xs, ys = [], []
-
+# FFT = Fast Fourier Transform (implementation algorithm of the Discrete Fourier Transform)
 fft_size = 512
 hop_size = 256
 
@@ -64,48 +60,49 @@ n_frames = n_frames_per_second // 2
 # And we'll move our window by 250 ms at a time
 frame_hops = n_frames_per_second // 4
 
-# Let's start with the music files
-for i in music:
-    # Load the ith file:
-    s = utils.load_audio(i)
 
-    # Now take the Discrete Fourier Transform of it:
+def prepare_audio_file(wav_file, label=None, fft_size=512, hop_size=256):
+    """
+    Prepares and audio file by taking the Discrete Fourier Transform of it
+    over many sliding windows, and returns the corresponding magnitudes
+    and labels
+    :param wav_file: Path to the .wav file to prepare
+    :param label: The label associated to the .wav if it is a labeled file (music: 0, speech: 1)
+    :param fft_size: Length of each window in the DFT
+    :param hop_size: Sliding length
+    :return: magnitudes array containing the magnitudes corresponding to the sliding windows,
+    and labels array containing the labels corresponding to each sliding window.
+    """
+    s = utils.load_audio(wav_file)
+    # Take the Discrete Fourier Transform:
     re, im = dft.dft_np(s, fft_size=fft_size, hop_size=hop_size)
-
     # And convert the complex representation (cartesian) to magnitudes/phases (polar representation):
     mag, phs = dft.ztoc(re, im)
-
     # This is how many sliding windows we have:
     n_hops = (len(mag) - n_frames) // frame_hops
-
     # Let's extract them all:
+    magnitudes, labels = [], []
     for hop_i in range(n_hops):
         # Get the current sliding window
         frames = mag[(hop_i * frame_hops):(hop_i * frame_hops + n_frames)]
-
         # We'll take the log magnitudes, as this is a nicer representation:
         this_X = np.log(np.abs(frames[..., np.newaxis]) + 1e-10)
+        magnitudes.append(this_X)
+        # And be sure that we store the correct label of this observation (0: music, 1: speech)
+        labels.append(label)
+    return magnitudes, labels
 
-        # And store it:
-        Xs.append(this_X)
 
-        # And be sure that we store the correct label of this observation:
-        ys.append(0)
+# Store every magnitude frame and its label being music: 0 or speech: 1
+Xs, ys = [], []
+audio_files = [music, speech]
+for label, files in enumerate(audio_files):
+    for i in files:
+        magnitudes, labels = prepare_audio_file(i, label=label, fft_size=fft_size, hop_size=hop_size)
+        Xs += magnitudes
+        ys += labels
 
-# Now do the same thing with the speech files
-for i in speech:
-    s = utils.load_audio(i)
-    re, im = dft.dft_np(s, fft_size=fft_size, hop_size=hop_size)
-    mag, phs = dft.ztoc(re, im)
-    n_hops = (len(mag) - n_frames) // frame_hops
-
-    for hop_i in range(n_hops):
-        frames = mag[(hop_i * frame_hops):(hop_i * frame_hops + n_frames)]
-        this_X = np.log(np.abs(frames[..., np.newaxis]) + 1e-10)
-        Xs.append(this_X)
-        ys.append(1)
-
-# Convert them to an array:
+# Convert the magnitude frames and their corresponding labels to arrays:
 Xs = np.array(Xs)
 ys = np.array(ys)
 
@@ -169,11 +166,11 @@ for layer_i, n_filters_i in enumerate(n_filters):
     print(H.get_shape().as_list())
 
 # Connect the last convolutional layer to a fully connected network
-fc, W = utils.linear(H, 100, name="fully_connected_layer_1")
+fc, _ = utils.linear(H, 100, name="fully_connected_layer_1")
 
 # And another fully connected layer, now with just 2 outputs, the number of outputs that our
-# one hot encoding has
-Y_predicted, W = utils.linear(fc, 2, activation=tf.nn.softmax, name="fully_connected_layer_2")
+# one hot encoding has. A SoftMax activation is necessary to output a categorical probability distribution
+Y_predicted, _ = utils.linear(fc, 2, activation=tf.nn.softmax, name="fully_connected_layer_2")
 
 # ==== TRAINING THE NETWORK ====
 # Cost function (measures the average loss of the batches)
@@ -186,8 +183,7 @@ actual_y = tf.argmax(Y, 1)
 correct_prediction = tf.equal(predicted_y, actual_y)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
-learning_rate = 0.001
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
 n_epochs = 10
 batch_size = 200
@@ -241,23 +237,14 @@ for layer_i in range(len(n_filters)):
     plt.show()
 
 # ==== USING THE NETWORK ====
-# Input a sound file and have the network classify it between music (0) or speech (1)
+# Input an unlabeled sound file and have the network classify it between music (0) or speech (1)
 
 
-def classify_audio_file(wav_file):
-    s = utils.load_audio(wav_file)
-    re, im = dft.dft_np(s, fft_size=fft_size, hop_size=hop_size)
-    mag, phs = dft.ztoc(re, im)
-    n_hops = (len(mag) - n_frames) // frame_hops
-    Xs = []
-    for hop_i in range(n_hops):
-        frames = mag[(hop_i * frame_hops):(hop_i * frame_hops + n_frames)]
-        this_X = np.log(np.abs(frames[..., np.newaxis]) + 1e-10)
-        Xs.append(this_X)
-    Xs = np.array(Xs)
-    return sess.run(tf.argmax(tf.reduce_mean(Y_predicted, 0), 0), feed_dict={X: Xs})
+def classify_unlabeled_audio_file(wav_file):
+    magnitudes, _ = prepare_audio_file(wav_file, fft_size=fft_size, hop_size=hop_size)
+    return sess.run(tf.argmax(tf.reduce_mean(Y_predicted, 0), 0), feed_dict={X: magnitudes})
 
 
 unlabeled_dir = os.path.join(os.path.join(dst, 'music_speech'), 'unlabeled_wav')
 wav_file = os.path.join(unlabeled_dir, 'EricJohnson-CliffsOfDover.wav')
-print(classify_audio_file(wav_file))
+print(classify_unlabeled_audio_file(wav_file))
