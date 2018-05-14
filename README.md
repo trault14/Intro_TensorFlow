@@ -50,7 +50,7 @@ Run the desired .py script :
 ```
 %run ./Deep_Audio_Classification_Network.py
 ```
-## Deep Convolutional Audio Classification Network
+## Deep Convolutional Audio Classification Network <a name="deep-audio-classification-network"></a>
 This supervised convolutional neural network aims at classifying audio files into two categories : either containing music, or speech. 
 The data set used to train the network (GTZAN Music and Speech) contains 64 music files and 64 speech files, each 30 seconds long and at a sample rate of 22050Hz (22050 samplings of audio per sec.). 
 The input to the network is the audio data, and the output is a one-hot encoding of the probability distribution [music, speech]. 
