@@ -2,7 +2,9 @@
 
 The following deep learning projects were realized as homework assignements of the following tutorial : [Creative Applications of Deep Learning Using TensorFlow](https://www.kadenze.com/courses/creative-applications-of-deep-learning-with-tensorflow-iv/info)
 The main library used for developping these algorithms is Google's TensorFlow.
-
+## Table of Contents
+1. [Installing](#installing)
+2. [Deep Convolutional Audio Classification Network](#deep-audio-classification-network)
 ## Installing
 The installation procedure will allow you to get the algorithms running on your machine, in order to run/tweak them.
 
