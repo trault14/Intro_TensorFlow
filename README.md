@@ -17,7 +17,7 @@ Start by cloning the repository on your disk :
 git clone https://github.com/trault14/Intro_TensorFlow
 ```
 ### Setting up a virtual environment
-I recommend using a python virtual environment for managing the dependencies. We'll need to install virtualenv :
+I recommend using a Python virtual environment for managing the dependencies. We'll need to install virtualenv :
 ```
 sudo apt-get update
 sudo apt-get install python3-pip
@@ -45,7 +45,7 @@ pip3 install matplotlib
 pip3 install pillow
 ```
 ### Running an algorithm
-We can now run any of the python scripts as follows :
+We can now run any of the Python scripts as follows :
 Open an interactive Python3 shell
 ```
 ipython3
@@ -58,8 +58,11 @@ Run the desired .py script :
 This supervised convolutional neural network aims at classifying audio files into two categories : either containing music, or speech. 
 The data set used to train the network (GTZAN Music and Speech) contains 64 music files and 64 speech files, each 30 seconds long and at a sample rate of 22050Hz (22050 samplings of audio per sec.). 
 The input to the network is the audio data, and the output is a one-hot encoding of the probability distribution [music, speech]. 
-The analysis of the audio files relies on the use of the Fourier transform. 
+
+The analysis of the audio files relies on the use of the Discrete Fourier Transform. 
 The network is capable of reaching a final test accuracy on unseen data of about 97% after approximately 10 epochs of training.
+The input data is split into 3 sub-sets : training (used to train the network), validation (to get an estimate of the accuracy after each epoch) and test (to get an estimate of the accuracy after training).
+The loss function uses a cross entropy model, and the size of the mini batches is currently set to 200.
 
 In its current version the network contains 4 convolutional layers of 9 filters each, all using a ReLU non-linear activation function. The stride is 2x2, so no Max Pooling layers are used. This is then followed by two fully connected layers of respectively 100 and 2 neurons. The last layer uses a SoftMax activation function in order to output a categorical probability distribution [music, speech].
 
@@ -86,7 +89,7 @@ In its current version, the encoder network uses three convolutional layers, eac
 The decoder network simply mirrors the encoder.
 
 ### Instructions
-Start the training of the network by lauching an ipython shell and running the Autoencoder_Convolutional.py file :
+Start the training of the network by launching an ipython shell and running the Autoencoder_Convolutional.py file :
 ```
 ipython3
 %run ./Autoencoder_Convolutional.py
@@ -98,7 +101,7 @@ It learns in an unsupervised fashion as the input data is unlabeled.
 
 The architecture of the encoder network relies on 4 Fully Connected layers that get progressively smaller : 512, 256, 128 and finally 64. The decoder network simply mirrors the encoder : 128, 256, 512 and finally 784 (output layer).
 ### Instructions
-Start the training of the network by lauching an ipython shell and running the Autoencoder_Convolutional.py file :
+Start the training of the network by launching an ipython shell and running the Autoencoder_Fully_Connected.py file :
 ```
 ipython3
 %run ./Autoencoder_Fully_Connected.py
@@ -112,12 +115,12 @@ Supervised learning is used here, as the cost function compares the predicted ou
 
 In its current form, the network is composed of a single fully connected layer of 10 output neurons. The network reaches an accuracy level of about 93% in 4 epochs.
 ### Instructions
-Start the training of the network by lauching an ipython shell and running the Autoencoder_Convolutional.py file :
+Start the training of the network by launching an ipython shell and running the Classification_Fully_Connected.py file :
 ```
 ipython3
 %run ./Classification_Fully_Connected.py
 ```
-Use the network by feeding it a single image, and check whether or not the prediction is correct by plotting also the image :
+Use the network by feeding it a single image, and check whether or not the prediction is correct by also plotting the image :
 ```
 print(sess.run(predicted_y, feed_dict={X: [ds.X[3]]})[0])
 plt.imshow(ds.X[3].reshape((28, 28)))
@@ -126,7 +129,7 @@ plt.show()
 ## Fully Connected Network to paint an image <a name="fc-image-painting"></a>
 This neural network implements a fun application : painting and image. The input to the network is a position on the 
 image, X = (row, col). The output is the color to paint, Y = (R, G, B). The network is of type fully connected and is composed of 6 hidden layers each containing 64 neurons. 
-The network relies on a supervised type of learning, given that each input position (x, y) is accompanied by its corresponding (r, g, b) label in the picture.
+The network relies on supervised learning, given that each input position (x, y) is accompanied by its corresponding (r, g, b) label in the picture.
 ### Instructions
 Start the training of the network for it to begin painting the input image :
 ```
